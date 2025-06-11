@@ -1,11 +1,11 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get("/scrape", async (_req, res) => {
+app.get("/scrape", async (_req: Request, res: Response) => {
   // const browser = await puppeteer.launch({
   //   args: chromium.args,
   //   defaultViewport: chromium.defaultViewport,
