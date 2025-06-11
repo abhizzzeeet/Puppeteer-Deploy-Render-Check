@@ -6,11 +6,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get("/scrape", async (_req, res) => {
+  // const browser = await puppeteer.launch({
+  //   args: chromium.args,
+  //   defaultViewport: chromium.defaultViewport,
+  //   executablePath: await chromium.executablePath(),
+  //   headless: chromium.headless,
+  // });
+
+  const isProd = process.env.NODE_ENV === "production";
+
   const browser = await puppeteer.launch({
     args: chromium.args,
     defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(),
-    headless: chromium.headless,
+    executablePath: isProd
+      ? await chromium.executablePath()
+      : (await import("puppeteer")).executablePath(),
+    headless: isProd ? chromium.headless : true,
   });
 
   const page = await browser.newPage();
