@@ -43,10 +43,14 @@
 
 // app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-
 import express, { Request, Response } from "express";
-import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
+
+// 👇 Use puppeteer-extra instead of puppeteer-core
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
+
+puppeteer.use(StealthPlugin());
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,10 +68,20 @@ app.get("/udyam-scrape", async (_req: Request, res: Response) => {
   });
 
   const page = await browser.newPage();
+
+  // Optional: Set user agent and viewport for more human-like behavior
+  await page.setUserAgent(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  );
+  await page.setViewport({ width: 1366, height: 768 });
+
   await page.goto("https://udyamregistration.gov.in/UdyamRegistration.aspx", {
     waitUntil: "networkidle2",
+    timeout: 60000,
   });
-  console.log("successfully fetched webpage now fetching data");
+
+  console.log("Page loaded. Scraping...");
+
   const data = await page.evaluate(() => {
     return {
       title: document.title,

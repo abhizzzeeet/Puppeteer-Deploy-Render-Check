@@ -73,13 +73,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // });
 // app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 const express_1 = __importDefault(require("express"));
-const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
 const chromium_1 = __importDefault(require("@sparticuz/chromium"));
+// 👇 Use puppeteer-extra instead of puppeteer-core
+const puppeteer_extra_1 = __importDefault(require("puppeteer-extra"));
+const puppeteer_extra_plugin_stealth_1 = __importDefault(require("puppeteer-extra-plugin-stealth"));
+puppeteer_extra_1.default.use((0, puppeteer_extra_plugin_stealth_1.default)());
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.get("/udyam-scrape", async (_req, res) => {
     const isProd = process.env.NODE_ENV === "production";
-    const browser = await puppeteer_core_1.default.launch({
+    const browser = await puppeteer_extra_1.default.launch({
         args: chromium_1.default.args,
         defaultViewport: chromium_1.default.defaultViewport,
         executablePath: isProd
@@ -88,10 +91,14 @@ app.get("/udyam-scrape", async (_req, res) => {
         headless: isProd ? chromium_1.default.headless : true,
     });
     const page = await browser.newPage();
+    // Optional: Set user agent and viewport for more human-like behavior
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+    await page.setViewport({ width: 1366, height: 768 });
     await page.goto("https://udyamregistration.gov.in/UdyamRegistration.aspx", {
         waitUntil: "networkidle2",
+        timeout: 60000,
     });
-    console.log("successfully fetched webpage now fetching data");
+    console.log("Page loaded. Scraping...");
     const data = await page.evaluate(() => {
         return {
             title: document.title,
