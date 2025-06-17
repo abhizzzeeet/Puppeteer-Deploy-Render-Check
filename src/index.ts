@@ -67,7 +67,7 @@ app.get("/udyam-scrape", async (_req: Request, res: Response) => {
   await page.goto("https://udyamregistration.gov.in/UdyamRegistration.aspx", {
     waitUntil: "networkidle2",
   });
-
+  console.log("successfully fetched webpage now fetching data");
   const data = await page.evaluate(() => {
     return {
       title: document.title,

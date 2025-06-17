@@ -1,4 +1,7 @@
 "use strict";
+// import express, { Request, Response } from "express";
+// import puppeteer from "puppeteer-core";
+// import chromium from "@sparticuz/chromium";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -36,18 +39,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// const app = express();
+// const PORT = process.env.PORT || 3000;
+// app.get("/scrape", async (_req: Request, res: Response) => {
+//   // const browser = await puppeteer.launch({
+//   //   args: chromium.args,
+//   //   defaultViewport: chromium.defaultViewport,
+//   //   executablePath: await chromium.executablePath(),
+//   //   headless: chromium.headless,
+//   // });
+//   const isProd = process.env.NODE_ENV === "production";
+//   const browser = await puppeteer.launch({
+//     args: chromium.args,
+//     defaultViewport: chromium.defaultViewport,
+//     executablePath: isProd
+//       ? await chromium.executablePath()
+//       : (await import("puppeteer")).executablePath(),
+//     headless: isProd ? chromium.headless : true,
+//   });
+//   const page = await browser.newPage();
+//   await page.goto("https://internshala.com/jobs/");
+//   const jobs = await page.evaluate(() => {
+//     const elements = Array.from(document.querySelectorAll(".individual_internship"));
+//     return elements.map((el) => ({
+//       title: el.querySelector("h3")?.textContent?.trim(),
+//       company: el.querySelector(".company_name")?.textContent?.trim(),
+//       location: el.querySelector(".location_link")?.textContent?.trim(),
+//       stipend: el.querySelector(".stipend")?.textContent?.trim()
+//     }));
+//   });
+//   await browser.close();
+//   res.json(jobs);
+// });
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 const express_1 = __importDefault(require("express"));
 const puppeteer_core_1 = __importDefault(require("puppeteer-core"));
 const chromium_1 = __importDefault(require("@sparticuz/chromium"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
-app.get("/scrape", async (_req, res) => {
-    // const browser = await puppeteer.launch({
-    //   args: chromium.args,
-    //   defaultViewport: chromium.defaultViewport,
-    //   executablePath: await chromium.executablePath(),
-    //   headless: chromium.headless,
-    // });
+app.get("/udyam-scrape", async (_req, res) => {
     const isProd = process.env.NODE_ENV === "production";
     const browser = await puppeteer_core_1.default.launch({
         args: chromium_1.default.args,
@@ -58,17 +88,18 @@ app.get("/scrape", async (_req, res) => {
         headless: isProd ? chromium_1.default.headless : true,
     });
     const page = await browser.newPage();
-    await page.goto("https://internshala.com/jobs/");
-    const jobs = await page.evaluate(() => {
-        const elements = Array.from(document.querySelectorAll(".individual_internship"));
-        return elements.map((el) => ({
-            title: el.querySelector("h3")?.textContent?.trim(),
-            company: el.querySelector(".company_name")?.textContent?.trim(),
-            location: el.querySelector(".location_link")?.textContent?.trim(),
-            stipend: el.querySelector(".stipend")?.textContent?.trim()
-        }));
+    await page.goto("https://udyamregistration.gov.in/UdyamRegistration.aspx", {
+        waitUntil: "networkidle2",
+    });
+    console.log("successfully fetched webpage now fetching data");
+    const data = await page.evaluate(() => {
+        return {
+            title: document.title,
+            heading: document.querySelector("h1, h2, h3")?.textContent?.trim(),
+            label: document.querySelector("label")?.textContent?.trim(),
+        };
     });
     await browser.close();
-    res.json(jobs);
+    res.json(data);
 });
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
